@@ -40,39 +40,43 @@ public class SceneController implements Initializable{
 	private Label label;
 	@FXML
 	private ProgressBar proBar;
+	@FXML
 	private TableColumn<Song, String> songCol,artistCol,albumCol;
+	
+	
 	ObservableList<Song> songList = FXCollections.observableArrayList();
 	List<File> list;
 	FileChooser fileChooser = new FileChooser();
-	Desktop desktop;
 	Song mySong;
-	
+	Song current;
 	
 	
 	@Override
-	public void initialize(URL arg0, ResourceBundle arg1) {
-		songCol = new TableColumn<Song, String>("song");
-		artistCol = new TableColumn<Song, String>("artist");
-		albumCol = new TableColumn<Song, String>("album");
-		
+	public void initialize(URL arg0, ResourceBundle arg1) {		
 		songCol.setCellValueFactory(
 				new PropertyValueFactory<Song,String>("title"));
-		//songCol.setCellFactory(new Callback);
 		artistCol.setCellValueFactory(
 				new PropertyValueFactory<Song,String>("artist"));
 		albumCol.setCellValueFactory(
 				new PropertyValueFactory<Song,String>("album"));
+		createVolume();
+		playBtn.setDisable(true);
+		stopBtn.setDisable(true);
+		volume.setDisable(true);
+		
+	}
+	
+	public void createVolume() {
 		volume.setMin(0);
 		volume.setMax(100);
 		volume.setValue(100);
 		volume.valueProperty().addListener(new InvalidationListener() {
 			@Override
 			public void invalidated(Observable observable) {
-				mySong.getMP().setVolume(volume.getValue()/100.0);
+				current.getMP().setVolume(volume.getValue()/100.0);
 			}
 			
 		});
-		
 	}
 	
 	// Event Listener on Button[#loadBtn].onAction
@@ -84,46 +88,34 @@ public class SceneController implements Initializable{
 	    FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("MP3 files", "*.mp3");
 	    fileChooser.getExtensionFilters().add(extFilter);
 		fileChooser.setTitle("Select MP3 files");
-		//File file = fileChooser.showOpenDialog(theStage);
-		//mySong = new Song(file);
 		list = fileChooser.showOpenMultipleDialog(theStage);
 		if(list!=null){
 			for(File x: list) {
 				mySong = new Song(x);
-				System.out.println(mySong.getTitle());
 				songList.add(mySong);
 			}
 		}
 		table.setItems(songList);
-		//table.getColumns().addAll(songCol,artistCol,albumCol);
+		playBtn.setDisable(false);
+		stopBtn.setDisable(false);
+		volume.setDisable(false);
 	}
 	
 	@FXML
 	public void playSong(ActionEvent event) {
-		mySong.play();
+		current = table.getSelectionModel().getSelectedItem();
+		ImageView img = new ImageView(current.getCover());
+		img.setFitHeight(120);
+		img.setFitWidth(200);
+		label.setGraphic(img);
+		current.play();
 	}
 	
 	@FXML
 	public void stopSong(ActionEvent event) {
-		//mySong.pause();
-		System.out.println("song title: "+mySong.getArtist()+mySong.getTitle());
-		ImageView img = new ImageView(mySong.getCover());
-		//img.fitWidthProperty().bind(label.widthProperty());
-		//img.fitHeightProperty().bind(label.heightProperty());
-		img.setFitHeight(120);
-		img.setFitWidth(200);
-		label.setGraphic(img);
-		//label.setGraphic(new ImageView(mySong.getCover()));
+		current.pause();
+		
 	}
-	
-	@FXML
-	
-	
-	public void updateTable(){
-		//songCol.s
-	}
-	
-
 	
 
 }
